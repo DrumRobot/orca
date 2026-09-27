@@ -27,8 +27,8 @@ export function runDeferredSessionReattachChoice(session: ConnectPanePtySession)
   const existingPtyId = storeSnapshot.tabsByWorktree[session.deps.worktreeId]?.find(
     (t) => t.id === session.deps.tabId
   )?.ptyId
-  // Why: a host-mirrored tab can only attach; the host answers liveness at connect, so a client note must not divert it.
-  const hasSleepingAgentSession =
+  // Why: the host owns a mirrored tab's agent liveness and answers it at connect; a client note must not divert its start.
+  const resumesFromSleepingNote =
     !isWebTerminalSurfaceTabId(session.deps.tabId) &&
     Boolean(session.getSleepingRecordForPane(storeSnapshot))
 
@@ -44,7 +44,7 @@ export function runDeferredSessionReattachChoice(session: ConnectPanePtySession)
 
   const restoredSessionId = restoredPtyId ?? null
   const sleptRemoteRuntimeSessionId =
-    restoredSessionId && isRemoteRuntimePtyId(restoredSessionId) && hasSleepingAgentSession
+    restoredSessionId && isRemoteRuntimePtyId(restoredSessionId) && resumesFromSleepingNote
       ? restoredSessionId
       : null
   const detachedLivePtyId =
@@ -56,7 +56,7 @@ export function runDeferredSessionReattachChoice(session: ConnectPanePtySession)
         : tabFallbackPtyId
       : null
   const detachedRemoteLeafPtyId =
-    restoredSessionId && isRemoteRuntimePtyId(restoredSessionId) && !hasSleepingAgentSession
+    restoredSessionId && isRemoteRuntimePtyId(restoredSessionId) && !resumesFromSleepingNote
       ? restoredSessionId
       : null
   const candidateReattachSessionId =
@@ -174,7 +174,7 @@ export function runDeferredSessionReattachChoice(session: ConnectPanePtySession)
                 `Pending PTY spawn for tab ${session.deps.tabId} resolved without a PTY id, retrying fresh spawn`
               )
             }
-            if (sleptRemoteColdRestoreStartup || hasSleepingAgentSession) {
+            if (sleptRemoteColdRestoreStartup || resumesFromSleepingNote) {
               session.startFreshColdRestoreAgentResume(sleptRemoteColdRestoreStartup ?? undefined)
             } else {
               session.startFreshSpawn()
@@ -205,7 +205,7 @@ export function runDeferredSessionReattachChoice(session: ConnectPanePtySession)
         })
     } else {
       recordPtyConnectDiagnostic(`pane=${session.pane.id} -> FRESH SPAWN`)
-      if (sleptRemoteColdRestoreStartup || hasSleepingAgentSession) {
+      if (sleptRemoteColdRestoreStartup || resumesFromSleepingNote) {
         session.startFreshColdRestoreAgentResume(sleptRemoteColdRestoreStartup ?? undefined)
       } else {
         session.startFreshSpawn()

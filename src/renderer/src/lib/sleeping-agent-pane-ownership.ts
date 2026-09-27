@@ -125,8 +125,8 @@ function paneWillConnectOnActivation(
   // never cancels it), so any preserved restorable pane cold-restores in place.
   // Gating on the visible tab forked a second live surface onto the same
   // provider session for every non-group-active agent tab. Web-mirror tabs are
-  // the exception: their pane only attaches the host PTY and never resumes from
-  // a note, so they cannot own recovery.
+  // the exception: their pane attaches the host PTY instead of cold-restoring
+  // from a note, so they cannot own recovery.
   return !isWebTerminalSurfaceTabId(tabId)
 }
 

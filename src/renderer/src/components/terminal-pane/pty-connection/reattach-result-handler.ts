@@ -10,7 +10,7 @@ import { resolveHiddenRestoreScrollbackRows } from '../terminal-hidden-restore-s
 import { shouldIgnoreStalePanePtyLayoutBinding } from './pane-pty-layout-binding'
 
 import { isRemoteRuntimePtyId } from './paired-parked-terminal-restore'
-import { shouldRetireEmptyReattach } from './empty-reattach-retire-evidence'
+import { hasEmptyReattachRetireEvidence } from './empty-reattach-retire-evidence'
 import type { ColdRestoreAgentResumeStartup } from './fresh-spawn-types'
 
 import type { ConnectPanePtySession } from './connect-pane-pty-session'
@@ -187,8 +187,11 @@ export function bindHandleReattachResult(sessionBag: ConnectPanePtySession): voi
     const hasStructuralReplay = Boolean(
       connectResult?.snapshot || connectResult?.replay || connectResult?.coldRestore
     )
+    // Why: reattach drops startup commands; only real hibernation is authority to retire an empty adopted shell and resume its provider session.
     if (
-      shouldRetireEmptyReattach({ ptyId, connectResult, hasStructuralReplay, coldRestoreStartup })
+      !hasStructuralReplay &&
+      connectResult?.isReattach &&
+      hasEmptyReattachRetireEvidence(ptyId, coldRestoreStartup)
     ) {
       session.transport.disconnect()
       if (staleSessionId) {
