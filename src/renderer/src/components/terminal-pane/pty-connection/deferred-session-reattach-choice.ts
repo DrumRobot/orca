@@ -27,7 +27,10 @@ export function runDeferredSessionReattachChoice(session: ConnectPanePtySession)
   const existingPtyId = storeSnapshot.tabsByWorktree[session.deps.worktreeId]?.find(
     (t) => t.id === session.deps.tabId
   )?.ptyId
-  const hasSleepingAgentSession = Boolean(session.getSleepingRecordForPane(storeSnapshot))
+  // Why: a host-mirrored tab can only attach; the host answers liveness at connect, so a client note must not divert it.
+  const hasSleepingAgentSession =
+    !isWebTerminalSurfaceTabId(session.deps.tabId) &&
+    Boolean(session.getSleepingRecordForPane(storeSnapshot))
 
   // Why: the tab-level fallback must not steal a PTY a setup sibling already published while the main pane waited for split geometry.
   const tabFallbackPtyId =
