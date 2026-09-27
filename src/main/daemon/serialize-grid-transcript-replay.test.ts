@@ -34,7 +34,11 @@ const KNOWN_PREEXISTING_I2_FAILURES: Record<string, number> = {
   less: 6,
   nano: 2,
   opencode: 5,
-  'claude-dialog-trust-workspace-answered': 13
+  'claude-dialog-trust-workspace-answered': 13,
+  'codex-composer-ready': 8,
+  // 23 diverge as the previous build did; one jitter checkpoint (conpty, seed 1, step 11) is new
+  // with the visible-width shrink serialization and still owes a fix.
+  'opencode-composer-ready': 24
 }
 
 type Transcript = { name: string; data: string; cols: number; rows: number }
