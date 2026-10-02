@@ -1,5 +1,4 @@
 {
-  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
   "name": "orca",
   "description": "Orca IDE agent skills: orca CLI (worktrees/terminals/browser/artifacts), multi-agent orchestration, computer-use, iOS/Android emulator control, Linear tickets, per-workspace environments",
   "owner": {
